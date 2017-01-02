@@ -1,0 +1,24 @@
+{
+  "name": "@nx-js/core",
+  "version": "1.0.0",
+  "description": "A Web Components based NX core.",
+  "main": "index.js",
+  "author": {
+    "name": "Miklos Bertalan",
+    "email": "miklos.bertalan@risingstack.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:nx-js/core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nx-js/core/issues"
+  },
+  "homepage": "http://nx-framework.com",
+  "license": "MIT",
+  "keywords": [
+    "nx",
+    "core",
+    "Web Components"
+  ]
+}

@@ -1,6 +1,6 @@
 # The core
 
-The `core` is a [Web Components](https://developers.google.com/web/fundamentals/getting-started/primers/customelements) based core for the NX framework. You can learn more in [the Docs](http://nx-framework/docs).
+The `core` is a [Web Components](https://developers.google.com/web/fundamentals/getting-started/primers/customelements) based core for the NX framework. You can learn more in [the Docs](http://nx-framework.com/docs).
 
 ## Installation
 

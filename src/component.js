@@ -112,13 +112,12 @@ function onMutations (mutations, contentObserver) {
       addedNodes.add(nodes[nodeIndex])
     }
   }
+  processAddedNodes()
 
   mutations = contentObserver.takeRecords()
   if (mutations.length) {
     onMutations(mutations, contentObserver)
   }
-
-  processAddedNodes()
 }
 
 function processAddedNodes () {

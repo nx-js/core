@@ -25,22 +25,28 @@ function use (middleware) {
   if (typeof middleware !== 'function') {
     throw new TypeError('first argument must be a function')
   }
+  if (middleware.$type && middleware.$type.indexOf('component') === -1) {
+    throw new Error(`${middleware.$name} can't be used as a component middleware`)
+  }
   const config = this[secret.config]
   config.middlewares = config.middlewares || []
   config.middlewares.push(middleware)
   return this
 }
 
-function useOnContent (contentMiddleware) {
-  if (typeof contentMiddleware !== 'function') {
+function useOnContent (middleware) {
+  if (typeof middleware !== 'function') {
     throw new TypeError('first argument must be a function')
+  }
+  if (middleware.$type && middleware.$type.indexOf('content') === -1) {
+    throw new Error(`${middleware.$name} can't be used as a content middleware`)
   }
   const config = this[secret.config]
   if (config.isolate === true) {
     console.log('warning: content middlewares have no effect inside isolated components')
   }
   config.contentMiddlewares = config.contentMiddlewares || []
-  config.contentMiddlewares.push(contentMiddleware)
+  config.contentMiddlewares.push(middleware)
   return this
 }
 

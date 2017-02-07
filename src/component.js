@@ -25,7 +25,7 @@ function use (middleware) {
   if (typeof middleware !== 'function') {
     throw new TypeError('first argument must be a function')
   }
-  if (middleware.$type && middleware.$type.indexOf('component') === -1) {
+  if (middleware.$type && middleware.$type !== 'component') {
     throw new Error(`${middleware.$name} can't be used as a component middleware`)
   }
   const config = this[secret.config]
@@ -38,7 +38,7 @@ function useOnContent (middleware) {
   if (typeof middleware !== 'function') {
     throw new TypeError('first argument must be a function')
   }
-  if (middleware.$type && middleware.$type.indexOf('content') === -1) {
+  if (middleware.$type && middleware.$type !== 'content') {
     throw new Error(`${middleware.$name} can't be used as a content middleware`)
   }
   const config = this[secret.config]

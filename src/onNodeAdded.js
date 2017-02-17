@@ -2,6 +2,7 @@
 
 const validateMiddlewares = require('./validateMiddlewares')
 const runMiddlewares = require('./runMiddlewares')
+const loaders = require('./loaders')
 
 module.exports = function onNodeAdded (node, context) {
   const parent = node.parentNode
@@ -59,7 +60,12 @@ function shouldProcess (node, type) {
     return false
   }
   if (type === 1) {
-    return ((!node.hasAttribute('is') && node.tagName.indexOf('-') === -1) || node.$registered)
+    const name = (node.getAttribute('is') || node.tagName).toLowerCase()
+    if (name.indexOf('-') !== -1 && !node.$registered) {
+      loaders.run(name)
+      return false
+    }
+    return true
   }
   if (type === 3) {
     return node.nodeValue.trim()

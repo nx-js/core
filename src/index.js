@@ -1,3 +1,4 @@
-'use strict'
-
-module.exports = require('./component')
+module.exports = {
+  component: require('./component'),
+  import: require('./loaders').register
+}

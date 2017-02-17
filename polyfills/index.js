@@ -1,3 +1,5 @@
 'use strict'
 
-require('./customElement')
+if (!document.registerElement) {
+  document.registerElement = require('./customElement')
+}

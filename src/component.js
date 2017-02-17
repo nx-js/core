@@ -79,6 +79,7 @@ function attachedCallback () {
     }
 
     this.$isolate = config.isolate
+    this.$heavy = config.heavy
     this.$contentMiddlewares = config.contentMiddlewares
     this.$middlewares = config.middlewares
     this.$shouldValidate = config.shouldValidate

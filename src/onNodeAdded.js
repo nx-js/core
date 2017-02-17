@@ -3,6 +3,7 @@
 const validateMiddlewares = require('./validateMiddlewares')
 const runMiddlewares = require('./runMiddlewares')
 const loaders = require('./loaders')
+const defer = ('requestIdleCallback' in window) ? requestIdleCallback : setTimeout
 
 module.exports = function onNodeAdded (node, context) {
   const parent = node.parentNode
@@ -11,13 +12,20 @@ module.exports = function onNodeAdded (node, context) {
     throw new Error(`Nested root component: ${node.tagName}`)
   }
   if ((validParent || node === node.$root) && context.isolate !== true) {
-    setupNodeAndChildren(node, context.state, context.contentMiddlewares, context.root)
+    processNode(node, context.state, context.contentMiddlewares, context.root)
   }
 }
 
-function setupNodeAndChildren (node, state, contentMiddlewares, root) {
-  const type = node.nodeType
-  if (!shouldProcess(node, type)) return
+function processNode (node, state, contentMiddlewares, root) {
+  if (node.$heavy) {
+    defer(() => setupNode(node, state, contentMiddlewares, root))
+  } else {
+    setupNode(node, state, contentMiddlewares, root)
+  }
+}
+
+function setupNode (node, state, contentMiddlewares, root) {
+  if (!shouldSetup(node)) return
   node.$lifecycleStage = 'attached'
 
   node.$contextState = node.$contextState || state || node.$state
@@ -40,26 +48,26 @@ function setupNodeAndChildren (node, state, contentMiddlewares, root) {
 
   runMiddlewares(node, contentMiddlewares, node.$middlewares)
 
-  if (type === 1 && node.$isolate !== true) {
+  if (node.nodeType === 1 && node.$isolate !== true) {
     let child = node.firstChild
     while (child) {
-      setupNodeAndChildren(child, node.$state, contentMiddlewares, node.$root)
+      processNode(child, node.$state, contentMiddlewares, node.$root)
       child = child.nextSibling
     }
 
     child = node.shadowRoot ? node.shadowRoot.firstChild : undefined
     while (child) {
-      setupNodeAndChildren(child, node.$state, contentMiddlewares, node.shadowRoot)
+      processNode(child, node.$state, contentMiddlewares, node.shadowRoot)
       child = child.nextSibling
     }
   }
 }
 
-function shouldProcess (node, type) {
+function shouldSetup (node) {
   if (node.$lifecycleStage) {
     return false
   }
-  if (type === 1) {
+  if (node.nodeType === 1) {
     const name = (node.getAttribute('is') || node.tagName).toLowerCase()
     if (name.indexOf('-') !== -1 && !node.$registered) {
       loaders.run(name)
@@ -67,7 +75,7 @@ function shouldProcess (node, type) {
     }
     return true
   }
-  if (type === 3) {
+  if (node.nodeType === 3) {
     return node.nodeValue.trim()
   }
 }

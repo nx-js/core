@@ -64,7 +64,7 @@ function setupNode (node, state, contentMiddlewares, root) {
 }
 
 function shouldSetup (node) {
-  if (node.$lifecycleStage) {
+  if (node.$lifecycleStage || !node.parentNode) {
     return false
   }
   if (node.nodeType === 1) {

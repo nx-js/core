@@ -1,17 +1,21 @@
 'use strict'
 
+const registry = require('./registry')
+const getContext = require('./getContext')
 const validateMiddlewares = require('./validateMiddlewares')
 const runMiddlewares = require('./runMiddlewares')
 const loaders = require('./loaders')
 const defer = ('requestIdleCallback' in window) ? requestIdleCallback : setTimeout
 
-module.exports = function onNodeAdded (node, context) {
+module.exports = function onNodeAdded (node) {
   const parent = node.parentNode
   const validParent = (parent && parent.$lifecycleStage === 'attached')
-  if (validParent && node === node.$root) {
+  /*if (validParent && node === node.$root) {
     throw new Error(`Nested root component: ${node.tagName}`)
-  }
-  if ((validParent || node === node.$root) && context.isolate !== true) {
+  }*/
+  const context = getContext(parent)
+  // its not yet upgraded -> doesn't have a root yet
+  if ((validParent || node.tagName === 'PERF-APP'/*node === node.$root*/) && context.isolate !== true) {
     processNode(node, context.state, context.contentMiddlewares, context.root)
   }
 }
@@ -28,10 +32,12 @@ function setupNode (node, state, contentMiddlewares, root) {
   if (!shouldSetup(node)) return
   node.$lifecycleStage = 'attached'
 
-  node.$contextState = node.$contextState || state || node.$state
+  node.$contextState = node.$contextState || state || {}
   node.$state = node.$state || node.$contextState
-  if (node.$inheritState) {
-    Object.setPrototypeOf(node.$state, node.$contextState)
+  if (node.$state === true) {
+    node.$state = {}
+  } else if (node.$state === 'inherit') {
+    node.$state = Object.create(state, {})
   }
 
   node.$root = node.$root || root
@@ -49,15 +55,9 @@ function setupNode (node, state, contentMiddlewares, root) {
   runMiddlewares(node, contentMiddlewares, node.$middlewares)
 
   if (node.nodeType === 1 && node.$isolate !== true) {
-    let child = node.firstChild
+    let child = node.shadowRoot ? node.shadowRoot.firstChild : node.firstChild
     while (child) {
       processNode(child, node.$state, contentMiddlewares, node.$root)
-      child = child.nextSibling
-    }
-
-    child = node.shadowRoot ? node.shadowRoot.firstChild : undefined
-    while (child) {
-      processNode(child, node.$state, contentMiddlewares, node.shadowRoot)
       child = child.nextSibling
     }
   }
@@ -69,9 +69,12 @@ function shouldSetup (node) {
   }
   if (node.nodeType === 1) {
     const name = (node.getAttribute('is') || node.tagName).toLowerCase()
-    if (name.indexOf('-') !== -1 && !node.$registered) {
-      loaders.run(name)
-      return false
+    if (name.indexOf('-') !== -1) {
+      const registered = registry.upgrade(name, node)
+      if (!registered) {
+        loaders.run(name)
+        return false
+      }
     }
     return true
   }

@@ -16,15 +16,9 @@ function cleanupNodeAndChildren (node) {
     node.$cleaners = undefined
   }
 
-  let child = node.firstChild
+  let child = node.shadowRoot ? node.shadowRoot.firstChild : node.firstChild
   while (child) {
     cleanupNodeAndChildren(child)
-    child = child.nextSibling
-  }
-
-  child = node.shadowRoot ? node.shadowRoot.firstChild : undefined
-  while (child) {
-    cleanupNodeAndChildren(child, node.$state, contentMiddlewares)
     child = child.nextSibling
   }
 }

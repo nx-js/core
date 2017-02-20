@@ -2,7 +2,7 @@
   "name": "@nx-js/core",
   "version": "1.1.0",
   "description": "A Web Components based NX core.",
-  "main": "index.js",
+  "main": "./src/index.js",
   "author": {
     "name": "Miklos Bertalan",
     "email": "miklos.bertalan@risingstack.com"

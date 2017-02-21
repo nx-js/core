@@ -1,15 +1,13 @@
-'use strict'
-
 let node
 let index, middlewares, middlewaresLength
 let contentIndex, contentMiddlewares, contentMiddlewaresLength
 
-module.exports = function runMiddlewares (currNode, currContentMiddlewares, currMiddlewares) {
+export default function runMiddlewares (currNode) {
   node = currNode
-  middlewares = currMiddlewares
-  contentMiddlewares = currContentMiddlewares
-  middlewaresLength = currMiddlewares ? currMiddlewares.length : 0
-  contentMiddlewaresLength = currContentMiddlewares ? currContentMiddlewares.length : 0
+  middlewares = node.$middlewares
+  contentMiddlewares = node.$contentMiddlewares
+  middlewaresLength = middlewares ? middlewares.length : 0
+  contentMiddlewaresLength = contentMiddlewares ? contentMiddlewares.length : 0
   index = contentIndex = 0
   next()
   node = middlewares = contentMiddlewares = undefined

@@ -1,6 +1,4 @@
-'use strict'
-
-module.exports = function validateConfig (rawConfig) {
+export default function validateConfig (rawConfig) {
   if (rawConfig === undefined) {
     rawConfig = {}
   }

@@ -1,17 +1,12 @@
-'use strict'
-
-const validateConfig = require('./validateConfig')
-const validateMiddlewares = require('./validateMiddlewares')
-const registry = require('./registry')
-const onNodeAdded = require('./onNodeAdded')
-const onNodeRemoved = require('./onNodeRemoved')
-const forEach = Array.prototype.forEach
+import validateConfig from './validateConfig'
+import { prevalidateMiddlewares } from './middlewareValidator'
+import { register as registerElement } from './registry'
 
 const secret = {
   config: Symbol('component config')
 }
 
-module.exports = function component (rawConfig) {
+export default function component (rawConfig) {
   return {use, useOnContent, register, [secret.config]: validateConfig(rawConfig)}
 }
 
@@ -49,11 +44,6 @@ function register (name) {
     throw new TypeError('first argument must be a string')
   }
   const config = this[secret.config]
-  config.shouldValidate = validateMiddlewares(config.contentMiddlewares, config.middlewares)
-  registry.register(name, config)
-  if (config.extends) {
-    forEach.call(document.querySelectorAll(`[is=${name}]`), onNodeAdded)
-  } else {
-    forEach.call(document.getElementsByTagName(name), onNodeAdded)
-  }
+  config.validated = prevalidateMiddlewares(config.contentMiddlewares, config.middlewares)
+  registerElement(name, config)
 }

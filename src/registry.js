@@ -1,31 +1,52 @@
-'use strict'
+import setupDom from './setupDom'
+import { run as runLoader } from './loaders'
 
 const registry = new Map()
+const forEach = Array.prototype.forEach
 
-function register (name, config) {
+export function register (name, config) {
   name = name.toLowerCase()
   if (registry.has(name)) {
     throw new Error('double registration')
   }
-
   registry.set(name, config)
+
+  if (config.extends) {
+    forEach.call(document.querySelectorAll(`[is=${name}]`), setupDom)
+  } else {
+    forEach.call(document.getElementsByTagName(name), setupDom)
+  }
 }
 
-function upgrade (name, node) {
-  const config = registry.get(name)
-  if (!config) {
-    return false
+export function upgrade (elem) {
+  if (elem.nodeType !== 1 || elem.$upgraded) {
+    return true
   }
-  node.$state = config.state
-  node.$isolate = config.isolate
-  node.$heavy = config.heavy
-  node.$contentMiddlewares = config.contentMiddlewares
-  node.$middlewares = config.middlewares
-  node.$shouldValidate = config.shouldValidate
-  if (config.root) {
-    node.$root = node
+  const name = (elem.getAttribute('is') || elem.tagName).toLowerCase()
+  if (name.indexOf('-') !== -1) {
+    const config = registry.get(name)
+    if (config) {
+      upgradeElement(elem, config)
+      return true
+    } else {
+      runLoader(name)
+      return false
+    }
   }
   return true
+}
+
+function upgradeElement (elem, config) {
+  elem.$state = config.state
+  elem.$isolate = config.isolate
+  elem.$heavy = config.heavy
+  elem.$contentMiddlewares = config.contentMiddlewares
+  elem.$middlewares = config.middlewares
+  elem.$validated = config.validated
+  if (config.root) {
+    elem.$root = elem
+  }
+  elem.$upgraded = true
 }
 
 const originalCreateElement = document.createElement
@@ -35,9 +56,4 @@ document.createElement = function createElement (name, is) {
     element.setAttribute('is', is)
   }
   return element
-}
-
-module.exports = {
-  register,
-  upgrade
 }

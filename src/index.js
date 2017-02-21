@@ -1,6 +1,4 @@
-require('./observer')
+import './observer'
 
-module.exports = {
-  component: require('./component'),
-  import: require('./loaders').register
-}
+export { default as component } from './component'
+export { register as load } from './loaders'

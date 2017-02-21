@@ -11,9 +11,7 @@ export default function setupDom (node) {
 }
 
 function setupNode (node, parent) {
-  const type = node.nodeType
-
-  if (upgradeElement(node) && shouldSetupNode(node, type)) {
+  if (upgradeElement(node)) {
     node.$lifecycleStage = 'attached'
     node.$cleanup = $cleanup
 
@@ -22,7 +20,7 @@ function setupNode (node, parent) {
     validateMiddlewares(node)
     setupMiddlewares(node, parent)
     runMiddlewares(node)
-    if (type === 1) iterateChildren(node, setupNode)
+    iterateChildren(node, setupNode)
   }
 }
 
@@ -32,10 +30,6 @@ function shouldSetupDom (node, parent) {
     ((parent && parent.$lifecycleStage === 'attached' && parent.$isolate !== true) ||
     node.$root === node)
   )
-}
-
-function shouldSetupNode (node, type) {
-  return (type === 1 || (type === 3 && node.nodeValue.trim()))
 }
 
 function setupRoot (node, parent) {

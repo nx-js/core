@@ -12,12 +12,9 @@ export default function setupDom (node) {
 
 function setupNode (node, parent) {
   if (upgradeElement(node)) {
-    node.$lifecycleStage = 'attached'
-    node.$cleanup = $cleanup
-
-    setupRoot(node, parent)
+    setupBase(node, parent)
     setupState(node, parent)
-    validateMiddlewares(node)
+    validateMiddlewares(node, parent)
     setupMiddlewares(node, parent)
     runMiddlewares(node)
     iterateChildren(node, setupNode)
@@ -32,17 +29,19 @@ function shouldSetupDom (node, parent) {
   )
 }
 
-function setupRoot (node, parent) {
+function setupBase (node, parent) {
+  node.$lifecycleStage = 'attached'
   node.$root = node.$root || parent.$root
+  node.$cleanup = $cleanup
 }
 
 function setupMiddlewares (node, parent) {
   if (node.$isolate === 'middlewares') {
     node.$contentMiddlewares = node.$contentMiddlewares || []
   } else if (node.$contentMiddlewares) {
-    node.$contentMiddlewares = parent.$contentMiddlewares.concat(node.$contentMiddlewares)
+    node.$contentMiddlewares = (parent.$contentMiddlewares || []).concat(node.$contentMiddlewares)
   } else {
-    node.$contentMiddlewares = parent.$contentMiddlewares
+    node.$contentMiddlewares = parent.$contentMiddlewares || []
   }
 }
 

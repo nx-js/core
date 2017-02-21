@@ -2,8 +2,8 @@ const names = new Set()
 const missing = new Set()
 const duplicates = new Set()
 
-export function validateMiddlewares (node) {
-  const contentMiddlewares = node.$contentMiddlewares
+export function validateMiddlewares (node, parent) {
+  const contentMiddlewares = parent.$contentMiddlewares
   const middlewares = node.$middlewares
 
   if (!node.$validated && (contentMiddlewares || middlewares)) {
@@ -18,10 +18,10 @@ export function validateMiddlewares (node) {
       middlewares.forEach(validateMiddleware)
     }
     if (missing.size) {
-      throw new Error(`missing middlewares: ${Array.from(missing).join()}`)
+      throw new Error(`Missing middlewares in ${node.tagName || node.nodeValue}: ${Array.from(missing).join()}`)
     }
     if (duplicates.size) {
-      throw new Error(`duplicate middlewares: ${Array.from(duplicates).join()}`)
+      throw new Error(`Duplicate middlewares in ${node.tagName || node.nodeValue}: ${Array.from(duplicates).join()}`)
     }
   }
 }

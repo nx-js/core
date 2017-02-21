@@ -43,6 +43,7 @@ function upgradeElement (elem, config) {
   elem.$contentMiddlewares = config.contentMiddlewares
   elem.$middlewares = config.middlewares
   elem.$validated = config.validated
+  elem.$contentMiddlewares = config.contentMiddlewares
   if (config.root) {
     elem.$root = elem
   }

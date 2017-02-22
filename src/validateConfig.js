@@ -47,13 +47,11 @@ export default function validateConfig (rawConfig) {
   }
 
   if (typeof rawConfig.element === 'string') {
-    try {
-      resultConfig.elementProto = Object.getPrototypeOf(document.createElement(rawConfig.element))
-      resultConfig.element = rawConfig.element
-    } catch (err) {
-      throw new Error(`invalid element config: ${rawConfig.element}, must be the name of a native element`)
-    }
-  } else if (rawConfig.element !== undefined) {
+    resultConfig.element = rawConfig.element
+    resultConfig.class = 'extension'
+  } else if (rawConfig.element === undefined) {
+    resultConfig.class = 'custom'
+  } else {
     throw new Error(`invalid element config: ${rawConfig.element}, must be the name of a native element`)
   }
   return resultConfig

@@ -46,6 +46,7 @@ function upgradeElement (elem, config) {
   if (config.root) {
     elem.$root = elem
   }
+  elem.classList.add(config.class)
   elem.$upgraded = true
 }
 

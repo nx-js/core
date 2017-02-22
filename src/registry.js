@@ -10,30 +10,42 @@ export function register (name, config) {
     throw new Error('double registration')
   }
   registry.set(name, config)
+  processRegistered(name, config)
+}
 
-  if (config.extends) {
-    forEach.call(document.querySelectorAll(`[is=${name}]`), setupDom)
+function processRegistered (name, config) {
+  if (config.element) {
+    forEach.call(document.querySelectorAll(`${config.element}[is=${name}]`), setupDom)
   } else {
     forEach.call(document.getElementsByTagName(name), setupDom)
   }
 }
 
 export function upgrade (elem) {
-  if (elem.nodeType !== 1 || elem.$upgraded) {
-    return true
-  }
-  const name = (elem.getAttribute('is') || elem.tagName).toLowerCase()
-  if (name.indexOf('-') !== -1) {
-    const config = registry.get(name)
-    if (config) {
-      upgradeElement(elem, config)
-      return true
-    } else {
-      runLoader(name)
-      return false
+  if (elem.nodeType === 1 && !elem.$upgraded) {
+    const tag = elem.tagName.toLowerCase()
+    const name = elem.getAttribute('is') || tag
+    if (name.indexOf('-') !== -1) {
+      return processElement(elem, name, tag)
     }
   }
   return true
+}
+
+function processElement (elem, name, tag) {
+  const config = registry.get(name)
+  if (config) {
+    validateConfig(config, tag)
+    upgradeElement(elem, config)
+    return true
+  }
+  runLoader(name)
+}
+
+function validateConfig (config, tag) {
+  if (config.element && config.element !== tag) {
+    throw new Error('Type extension used on the wrong element.')
+  }
 }
 
 function upgradeElement (elem, config) {

@@ -3,21 +3,12 @@ import { upgrade as upgradeElement } from './registry'
 import { validateMiddlewares } from './middlewareValidator'
 import runMiddlewares from './runMiddlewares'
 
+const defer = ('requestIdleCallback' in window) ? requestIdleCallback : setTimeout
+
 export default function setupDom (node) {
   const parent = node.parentNode
   if (upgradeElement(node) && shouldSetupDom(node, parent)) {
     setupNode(node, parent)
-  }
-}
-
-function setupNode (node, parent) {
-  if (upgradeElement(node)) {
-    setupBase(node, parent)
-    setupState(node, parent)
-    validateMiddlewares(node, parent)
-    setupMiddlewares(node, parent)
-    runMiddlewares(node)
-    iterateChildren(node, setupNode)
   }
 }
 
@@ -29,6 +20,22 @@ function shouldSetupDom (node, parent) {
   )
 }
 
+function setupNode (node, parent) {
+  if (upgradeElement(node)) {
+    if (node.$heavy) defer(() => processNode(node, parent))
+    else processNode(node, parent)
+  }
+}
+
+function processNode (node, parent) {
+  setupBase(node, parent)
+  setupState(node, parent)
+  setupMiddlewares(node, parent)
+  validateMiddlewares(node)
+  runMiddlewares(node)
+  iterateChildren(node, setupNode)
+}
+
 function setupBase (node, parent) {
   node.$lifecycleStage = 'attached'
   node.$root = node.$root || parent.$root
@@ -36,6 +43,9 @@ function setupBase (node, parent) {
 }
 
 function setupMiddlewares (node, parent) {
+  if (!node.$contentMiddlewares && !node.$middlewares) {
+    node.$validated = true
+  }
   if (node.$isolate === 'middlewares') {
     node.$contentMiddlewares = node.$contentMiddlewares || []
   } else if (node.$contentMiddlewares) {

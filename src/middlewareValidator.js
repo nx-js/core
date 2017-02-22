@@ -2,14 +2,14 @@ const names = new Set()
 const missing = new Set()
 const duplicates = new Set()
 
-export function validateMiddlewares (node, parent) {
-  const contentMiddlewares = parent.$contentMiddlewares
-  const middlewares = node.$middlewares
-
-  if (!node.$validated && (contentMiddlewares || middlewares)) {
+export function validateMiddlewares (node) {
+  if (!node.$validated) {
     names.clear()
     missing.clear()
     duplicates.clear()
+
+    const contentMiddlewares = node.$contentMiddlewares
+    const middlewares = node.$middlewares
 
     if (contentMiddlewares) {
       contentMiddlewares.forEach(validateMiddleware)

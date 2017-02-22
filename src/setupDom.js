@@ -2,6 +2,7 @@ import { iterateChildren } from '@nx-js/dom-util'
 import { upgrade as upgradeElement } from './registry'
 import { validateMiddlewares } from './middlewareValidator'
 import runMiddlewares from './runMiddlewares'
+import { observe } from './observer'
 
 const defer = ('requestIdleCallback' in window) ? requestIdleCallback : setTimeout
 
@@ -33,8 +34,9 @@ function processNode (node, parent) {
   setupMiddlewares(node, parent)
   validateMiddlewares(node)
   runMiddlewares(node)
-  iterateChildren(node, setupNode)
+  setupChildren(node)
 }
+
 
 function setupBase (node, parent) {
   node.$lifecycleStage = 'attached'
@@ -62,6 +64,16 @@ function setupState (node, parent) {
     node.$state = {}
   } else if (node.$state === 'inherit') {
     node.$state = Object.create(state, {})
+  }
+}
+
+function setupChildren (node) {
+  const shadow = node.shadowRoot
+  if (shadow) {
+    observe(shadow)
+    iterateChildren(shadow, setupNode)
+  } else {
+    iterateChildren(node, setupNode)
   }
 }
 

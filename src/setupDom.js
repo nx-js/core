@@ -14,11 +14,12 @@ export default function setupDom (node) {
 }
 
 function shouldSetupDom (node, parent) {
-  return (
-    !node.$lifecycleStage &&
-    ((parent && parent.$lifecycleStage === 'attached' && parent.$isolate !== true) ||
-    node.$root === node)
-  )
+  const validParent = (parent && parent.$lifecycleStage === 'attached' && parent.$isolate !== true)
+  const isRoot = (node.$root === node)
+  if (validParent && isRoot) {
+    throw new Error('Nested root component.')
+  }
+  return (!node.$lifecycleStage && (validParent || isRoot))
 }
 
 function setupNode (node, parent) {

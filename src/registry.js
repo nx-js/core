@@ -1,3 +1,4 @@
+import registerRoot from './registerRoot'
 import setupDom from './setupDom'
 import { run as runLoader } from './loaders'
 
@@ -10,7 +11,11 @@ export function register (name, config) {
     throw new Error('double registration')
   }
   registry.set(name, config)
-  processRegistered(name, config)
+  if (config.root) {
+    registerRoot(name, config)
+  } else {
+    processRegistered(name, config)
+  }
 }
 
 function processRegistered (name, config) {
@@ -63,10 +68,10 @@ function upgradeElement (elem, config) {
 }
 
 const originalCreateElement = document.createElement
-document.createElement = function createElement (name, is) {
+document.createElement = function createElement (name, config) {
   const element = originalCreateElement.call(document, name)
-  if (is) {
-    element.setAttribute('is', is)
+  if (config && config.is) {
+    element.setAttribute('is', config.is)
   }
   return element
 }
